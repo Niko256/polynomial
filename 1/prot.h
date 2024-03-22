@@ -1,34 +1,56 @@
-#include <complex.h>
+#ifndef PROT_H
+#define PROT_H
 
-// INTEGER
-void* int_add(void* c1, void* c2, void* result);
-void* int_product(void* c1, void* c2, void* result);
-void* multiply_by_int_scalar(void* coeff, int scalar, void* result);
+#include "polynomial.h"
 
-void* int_inverse_add(void* elem, void* result);
-void* int_inverse_prod(void* elem, void* result);
-void* int_neutral_add(void* elem, void* result);
-void* int_neutral_prod(void* elem, void* result);
+Field_Info* create_Field_info(
+    int coeff_size, 
+    void* (*add)(void* coeff_1, void* coeff_2),
+    void* (*product)(void* coeff_1, void* coeff_2), 
+    void* (*inverse_elem_add)(void* elem),
+    void* (*inverse_elem_prod)(void* elem),
+    void* (*neutral_elem_add)(),
+    void* (*neutral_elem_prod)());
 
-// REAL
-void* real_inverse_add(void* elem, void* result);
-void* real_inverse_prod(void* elem, void* result);
-void* real_neutral_add(void* elem, void* result);
-void* real_neutral_prod(void* elem, void* result);
+void free_Field(void* field);
 
-void* real_add(void* c1, void* c2, void* result);
-void* real_product(void* c1, void* c2, void* result);
-void* multiply_by_real_scalar(void* coeff, double scalar);
+// Integer field operations
+Field_Info* create_int_Field_info();
+void* int_add(void* coeff_1, void* coeff_2);
+void* int_product(void* coeff_1, void* coeff_2);
+void* int_inverse_add(void* coeff);
+void* int_neutral_add();
+void* int_inverse_prod(void* coeff);
+void* int_neutral_prod();
 
-// COMPLEX
-void* complex_inverse_add(void* elem, void* result);
-void* complex_inverse_prod(void* elem, void* result);
-void* complex_neutral_add(void* result);
-void* complex_neutral_prod(void* elem, void* result);
+// Real field operations
+Field_Info* create_real_Field_info();
+void* real_add(void* coeff_1, void* coeff_2);
+void* real_product(void* coeff_1, void* coeff_2);
+void* real_inverse_add(void* coeff);
+void* real_neutral_add();
+void* real_inverse_prod(void* coeff);
+void* real_neutral_prod();
 
-void* complex_conj(void* elem, void* result);
-void* complex_add(void* c1, void* c2, void* result);
-void* complex_product(void* c1, void* c2, void* result);
-void* multiply_by_complex_scalar(void* coeff, complex scalar);
+// Complex field operations
+Field_Info* create_complex_Field_info();
+void* complex_add(void* coeff_1, void* coeff_2);
+void* complex_product(void* coeff_1, void* coeff_2);
+void* complex_inverse_add(void* coeff);
+void* complex_neutral_add();
+void* complex_inverse_prod(void* coeff);
+void* complex_neutral_prod();
+
+// Polynomial operations
+polynomial* sum(polynomial p_1, polynomial p_2);
+void zero_coefficients(void* coeffs, int count, Field_Info* fi);
+
+#endif // !PROT_H
+#define PROT_H
+
+#include "polynomial.h"
+
+
+
 
 
