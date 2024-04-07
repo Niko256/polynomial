@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <complex.h>
+#include "error_codes.h"
 
 
 Field_Info* create_Field_info(
@@ -53,10 +54,15 @@ Field_Info* create_int_Field_info(){
 
 
 void* int_add(void* coeff_1, void* coeff_2){
+    if (coeff_1 == NULL || coeff_2 == NULL){
+        handle_err_code(ERR_MEMORY_ALLOCATION);
+        return NULL;
+    }
+
     int* result = malloc(sizeof(int));
     if (result == NULL) {
-        fprintf(stderr, "Memory allocation failed for int_add");
-        exit(EXIT_FAILURE);
+        handle_err_code(ERR_MEMORY_ALLOCATION);
+        return NULL; 
     }
 
     *result = *(int*)coeff_1 + *(int*)coeff_2;
@@ -65,14 +71,14 @@ void* int_add(void* coeff_1, void* coeff_2){
 
 void* int_product(void* coeff_1, void* coeff_2) {
     if (coeff_1 == NULL || coeff_2 == NULL) {
-        fprintf(stderr, "Nullptr argument supplied to int_product");
+        handle_err_code(ERR_NULLPTR);
         return NULL;
     }
 
     int* result = malloc(sizeof(int));
     if (result == NULL) {
-        fprintf(stderr, "Memory allocation failed for int_product");
-        exit(EXIT_FAILURE);
+        handle_err_code(ERR_MEMORY_ALLOCATION);
+        return NULL;
     }
 
     *result = *(int*)coeff_1 * *(int*)coeff_2;
@@ -83,14 +89,14 @@ void* int_product(void* coeff_1, void* coeff_2) {
 void* int_inverse_add(void* coeff) {
     
     if (coeff == NULL) {
-        fprintf(stderr, "Memory allocation failed (coeff in int_inverse_add is NULL)");
+        handle_err_code(ERR_NULLPTR);
         return NULL;
     }
 
     int* result = malloc(sizeof(int));
     if (result == NULL) {
-        fprintf(stderr, "Memory allocation failed for int_inverse_add");
-        exit(EXIT_FAILURE);
+        handle_err_code(ERR_MEMORY_ALLOCATION);
+        return NULL;
     }
 
     *result = -(*(int*)coeff);
@@ -101,19 +107,19 @@ void* int_inverse_add(void* coeff) {
 void* int_inverse_prod(void* coeff) {
     
     if (coeff == NULL) {
-        fprintf(stderr, "Null pointer passed to int_inverse_prodn");
+        handle_err_code(ERR_NULLPTR);
         return NULL;
     }
 
     
     if (*(int*)coeff == 0) {
-        fprintf(stderr, "Division by zero in int_inverse_prodn");
+        handle_err_code(ERR_DIVISION_BY_ZERO);
         return NULL;
     }
 
     int* result = malloc(sizeof(int));
     if (result == NULL) {
-        fprintf(stderr, "Memory allocation failed for int_inverse_prodn");
+        handle_err_code(ERR_MEMORY_ALLOCATION);
         return NULL;
     }
 
@@ -127,7 +133,7 @@ void* int_inverse_prod(void* coeff) {
 void* int_neutral_add(){
     int* result = malloc(sizeof(int));
     if (result == NULL) {
-        fprintf(stderr, "Memory allocation failed for int_neutral_add");
+        handle_err_code(ERR_MEMORY_ALLOCATION);
         exit(EXIT_FAILURE);
     }
 
@@ -139,8 +145,8 @@ void* int_neutral_add(){
 void* int_neutral_prod(){
     int* result = malloc(sizeof(int));
     if (result == NULL) {
-        fprintf(stderr, "Memory allocation failed for int_neutral_prod");
-        exit(EXIT_FAILURE);
+        handle_err_code(ERR_MEMORY_ALLOCATION);
+        return NULL;
     }
 
     *result = 1;
@@ -164,9 +170,9 @@ Field_Info* create_real_Field_info(){
 
 void* real_add(void* coeff_1, void* coeff_2){
     double* result = malloc(sizeof(double));
-    if (result == NULL){
-        fprintf(stderr, "Memory allocation failed for real_add");
-        exit(EXIT_FAILURE);
+    if (result == NULL) {
+        handle_err_code(ERR_MEMORY_ALLOCATION);
+        return NULL;
     }
 
     *result = *(double*)coeff_1 + *(double*)coeff_2;
@@ -176,9 +182,9 @@ void* real_add(void* coeff_1, void* coeff_2){
 
 void* real_product(void* coeff_1, void* coeff_2){
     double* result = malloc(sizeof(double));
-    if (result == NULL){
-        fprintf(stderr, "Memory allocation failed for real_product");
-        exit(EXIT_FAILURE);
+    if (result == NULL) {
+        handle_err_code(ERR_MEMORY_ALLOCATION);
+        return NULL;
     }
 
     *result = *(double*)coeff_1 * *(double*)coeff_2;
@@ -189,9 +195,9 @@ void* real_product(void* coeff_1, void* coeff_2){
 void* real_inverse_add(void* coeff) {
 
     double* result = malloc(sizeof(double));
-    if (result == NULL){
-        fprintf(stderr, "Memory allocation failed for real_inverse_add");
-        exit(EXIT_FAILURE);
+    if (result == NULL) {
+        handle_err_code(ERR_MEMORY_ALLOCATION);
+        return NULL;
     }
 
     *result = (1 / (*(double*)coeff));
@@ -202,15 +208,14 @@ void* real_inverse_add(void* coeff) {
 void* real_inverse_prod(void* coeff){
     double* real_coeff = (double*)coeff;
 
-    if (*real_coeff == 0.0){
-        fprintf(stderr, "Division by zero in real_inverse_prod");
-        exit(EXIT_FAILURE);
+    if (*real_coeff == 0.0) {
+        handle_err_code(ERR_DIVISION_BY_ZERO);
     }
 
     double* result = malloc(sizeof(double));
-    if (result == NULL){
-        fprintf(stderr, "Memory allocation failed by real_inverse_prod");
-        exit(EXIT_FAILURE);
+    if (result == NULL) {
+        handle_err_code(ERR_MEMORY_ALLOCATION);
+        return NULL;
     }
 
     *result = (1.0 / *real_coeff);
@@ -220,9 +225,9 @@ void* real_inverse_prod(void* coeff){
 
 void* real_neutral_add(){
     double* result = malloc(sizeof(double));
-    if (result == NULL){
-        fprintf(stderr, "Memory allocation failed for real_neutral_add");
-        exit(EXIT_FAILURE);
+    if (result == NULL) {
+        handle_err_code(ERR_MEMORY_ALLOCATION);
+        return NULL;
     }
 
     *result = 0.0;
@@ -232,8 +237,8 @@ void* real_neutral_add(){
 void* real_neutral_prod(){
     double* result = malloc(sizeof(double));
     if (result == NULL) {
-        fprintf(stderr, "Memory allocation failed for real_neutral_prod");
-        exit(EXIT_FAILURE);
+        handle_err_code(ERR_MEMORY_ALLOCATION);
+        return NULL;
     }
 
     *result = 1.0;
@@ -258,9 +263,9 @@ Field_Info* create_complex_Field_info(){
 
 void* complex_add(void* coeff_1, void* coeff_2){
     complex double* result = malloc(sizeof(complex double));
-    if (result == NULL){
-        fprintf(stderr, "Memory allocation failed for complex_add");
-        exit(EXIT_FAILURE);
+    if (result == NULL) {
+        handle_err_code(ERR_MEMORY_ALLOCATION);
+        return NULL;
     }
 
     *result = (*(complex double*)coeff_1 + *(complex double*)coeff_2);
@@ -270,9 +275,9 @@ void* complex_add(void* coeff_1, void* coeff_2){
 
 void* complex_product(void* coeff_1, void* coeff_2){
     complex double* result = malloc(sizeof(complex double));
-    if (result == NULL){
-        fprintf(stderr, "Memory allocation failed for complex_product");
-        exit(EXIT_FAILURE);
+    if (result == NULL) {
+        handle_err_code(ERR_MEMORY_ALLOCATION);
+        return NULL;
     }
 
     *result = (*(complex double*)coeff_1 * *(complex double*)coeff_2);
@@ -283,9 +288,9 @@ void* complex_product(void* coeff_1, void* coeff_2){
 void* complex_inverse_add(void* coeff) {
     complex double* result = malloc(sizeof(complex double));
 
-    if (result == NULL){
-        fprintf(stderr, "Memory allocation failed for complex_inverse_add");
-        exit(EXIT_FAILURE);
+    if (result == NULL) {
+        handle_err_code(ERR_MEMORY_ALLOCATION);
+        return NULL;
     }
 
     *result = -(*(complex double*)coeff);
@@ -300,14 +305,14 @@ void* complex_inverse_prod(void* coeff) {
 
     // if complex root == 0.0
     if (cabs(*complex_coeff) == 0.0) {
-        fprintf(stderr, "Division by zero in complex_inverse_prod");
-        exit(EXIT_FAILURE);
+        handle_err_code(ERR_DIVISION_BY_ZERO);
+        return NULL;
     }
 
     complex double* result = malloc(sizeof(complex double));
     if (result == NULL) {
-        fprintf(stderr, "Memory allocation failed for complex_inverse_prod");
-        exit(EXIT_FAILURE);
+        handle_err_code(ERR_MEMORY_ALLOCATION);
+        return NULL;
     }
 
     *result = (1.0 / *complex_coeff);
@@ -318,9 +323,9 @@ void* complex_inverse_prod(void* coeff) {
 void* complex_neutral_add() {
 
     complex double* result = malloc(sizeof(complex double));
-    if (result == NULL){
-        fprintf(stderr, "Memory allocation failed for complex_neutral_add");
-        exit(EXIT_FAILURE);
+    if (result == NULL) {
+        handle_err_code(ERR_MEMORY_ALLOCATION);
+        return NULL;
     }
 
     *result = 0.0 + 0.0 * I;
@@ -331,8 +336,8 @@ void* complex_neutral_add() {
 void* complex_neutral_prod() {
     complex double* result = malloc(sizeof(complex double));
     if (result == NULL) {
-        fprintf(stderr, "Memory allocation failed for complex_neutral_prod");
-        exit(EXIT_FAILURE);
+        handle_err_code(ERR_MEMORY_ALLOCATION);
+        return NULL;
     }
 
     *result = 1.0 + 0.0 * I;

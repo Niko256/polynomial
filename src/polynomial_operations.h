@@ -1,6 +1,8 @@
 #include "polynomial.h"
 #include <complex.h>
 
+polynomial* create_poly(int degree, Field_Info* field);
+
 void free_polynomial(polynomial* poly);
 
 void free_Field(Field_Info* field);  

@@ -1,9 +1,35 @@
+#include "error_codes.h"
 #include "polynomial.h"
 #include "prot.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <complex.h>
+
+
+polynomial* create_poly(int degree, Field_Info* field) {
+    polynomial* poly = malloc(sizeof(polynomial));
+    if (!poly){
+        handle_err_code(ERR_MEMORY_ALLOCATION);
+        return NULL;
+    }
+
+    poly->degree = degree;
+    poly->field = field;
+    poly->coeffs = calloc(degree + 1, field->coeff_size);
+    if (!poly->coeffs){
+        handle_err_code(ERR_MEMORY_ALLOCATION);
+        free(poly);
+        return NULL;
+    }
+
+    for (int i = 0; i <= degree; ++i){
+        memcpy((char*)poly->coeffs + i * field->coeff_size, field->neutral_elem_add(), field->coeff_size);
+    }
+
+    return poly;
+}
+
 
 
 void free_polynomial(polynomial* poly){
@@ -18,7 +44,7 @@ void free_polynomial(polynomial* poly){
 }
 
 void cout_poly(polynomial *poly, Field_Info* field) {
-   for (int i = 0; i <= poly->degree; ++i) {
+    for (int i = 0; i <= poly->degree; ++i) {
         if (field->coeff_size == sizeof(int)) {
             printf("%d", *((int*)(poly->coeffs + i * field->coeff_size)));
         }
@@ -34,10 +60,10 @@ void cout_poly(polynomial *poly, Field_Info* field) {
 
         if (i > 0)
             printf("x");
-            if (i > 1)
-                printf("^%d", i);
-            if (i != poly->degree)
-                printf(" + ");
+        if (i > 1)
+            printf("^%d", i);
+        if (i != poly->degree)
+            printf(" + ");
     }
 }
 
@@ -45,7 +71,7 @@ void cout_poly(polynomial *poly, Field_Info* field) {
 // SUM
 polynomial* sum_polynomials(polynomial* p_1, polynomial* p_2) {
     if (p_1->field != p_2->field){
-        fprintf(stderr, "Fields are different (sum_polynomials)");
+        handle_err_code(ERR_DIFFERENT_FIELDS);
         return NULL;
     }
 
@@ -53,7 +79,7 @@ polynomial* sum_polynomials(polynomial* p_1, polynomial* p_2) {
 
     void* result_cf = calloc(max_degree + 1, p_1->field->coeff_size);
     if (result_cf == NULL) {
-        fprintf(stderr, "Memory allocation failed for sum_polynomials");
+        handle_err_code(ERR_MEMORY_ALLOCATION);
         return NULL;
     }
 
@@ -68,7 +94,7 @@ polynomial* sum_polynomials(polynomial* p_1, polynomial* p_2) {
 
     polynomial* result_poly = malloc(sizeof(polynomial));
     if (result_poly == NULL) {
-        fprintf(stderr, "Memory allocation failed for result_poly");
+        handle_err_code(ERR_MEMORY_ALLOCATION);
         free(result_cf);
         return NULL;
     }
@@ -84,7 +110,7 @@ polynomial* sum_polynomials(polynomial* p_1, polynomial* p_2) {
 // PRODUCT
 polynomial* product_polynomials(polynomial* p_1, polynomial* p_2) {
     if (p_1->field != p_2->field) {
-        fprintf(stderr, "Fields are different (product_polynomials)");
+        handle_err_code(ERR_DIFFERENT_FIELDS);
         return NULL;
     }   
 
@@ -92,7 +118,7 @@ polynomial* product_polynomials(polynomial* p_1, polynomial* p_2) {
 
     void* res_cf = calloc(res_degree + 1, p_1->field->coeff_size);
     if (res_cf == NULL) {
-        fprintf(stderr, "Memory allocation failed for res_cf (product_polynomials)");
+        handle_err_code(ERR_MEMORY_ALLOCATION);
         return NULL;
     }
 
@@ -115,7 +141,7 @@ polynomial* product_polynomials(polynomial* p_1, polynomial* p_2) {
     polynomial* res_poly = malloc(sizeof(polynomial));
 
     if (res_poly == NULL) {
-        fprintf(stderr, "Memory allocation failed for res_poly (product_polynomials)");
+        handle_err_code(ERR_MEMORY_ALLOCATION);
         free(res_cf);
         return NULL;
     }
@@ -132,7 +158,7 @@ polynomial* product_polynomials(polynomial* p_1, polynomial* p_2) {
 polynomial* scalar_multiply(polynomial* poly, void* scalar) {
     void* res_cf = malloc((poly->degree + 1) * poly->field->coeff_size);
     if (res_cf == NULL) {
-        fprintf(stderr, "Memory allocate failed for res_cf (scalar_multiply)");
+        handle_err_code(ERR_MEMORY_ALLOCATION);
         return NULL;
     }
 
@@ -146,7 +172,7 @@ polynomial* scalar_multiply(polynomial* poly, void* scalar) {
 
     polynomial* result_poly = malloc(sizeof(polynomial));
     if (result_poly == NULL) {
-        fprintf(stderr, "Memory allocate failed for result_poly (scalar_multiply)");
+        handle_err_code(ERR_MEMORY_ALLOCATION);
         free(res_cf);
         return NULL;
     }
@@ -162,14 +188,14 @@ polynomial* scalar_multiply(polynomial* poly, void* scalar) {
 polynomial* create_zero_poly(Field_Info* field) {
     polynomial* zero_poly = malloc(sizeof(polynomial));
     if (!zero_poly) {
-        fprintf(stderr, "Memory allocation failed for zero_poly");
+        handle_err_code(ERR_MEMORY_ALLOCATION);
         return NULL;
     }
 
     zero_poly->degree = 0;
     zero_poly->coeffs = calloc(1, field->coeff_size);
     if (!zero_poly->coeffs) {
-        fprintf(stderr, "Memory allocation failed for zero_poly coeffs");
+        handle_err_code(ERR_MEMORY_ALLOCATION);
         free(zero_poly);
         return NULL;
     }
@@ -194,13 +220,14 @@ polynomial* raise_to_power(polynomial* poly, int exp) {
 
     polynomial* result = poly;
     if (result == NULL) {
-        fprintf(stderr, "Memory allocation failed for result (raise_to_power)\n");
+        handle_err_code(ERR_NULLPTR);
+        return NULL;
     }
 
     for (int i = 1; i < exp; ++i) {
         polynomial* temp = product_polynomials(result, poly);
         if (temp == NULL) {
-            fprintf(stderr, "Memory allocation failed for temp (raise_to_power)\n");
+            handle_err_code(ERR_NULLPTR);
             return NULL;
         }
 
@@ -245,7 +272,7 @@ double eval_poly_db(polynomial* poly, double x) {
 complex double eval_poly_cmp(polynomial* poly, complex double x) {
     complex double result = 0.0 + 0.0 + I;
     complex double x_power = 1.0 + 0.0 + I; // from x^0.0
-    
+
 
     for (int i = 0; i < poly->degree; ++i) {
         result += ((complex double*)poly->coeffs)[i] * x_power;
@@ -289,7 +316,7 @@ void* evaluate_poly(polynomial* poly, void* x) {
 
 polynomial* composition(polynomial* poly_1, polynomial* poly_2) {
     if (poly_1->field != poly_2->field) {
-        fprintf(stderr, "Fields are different (composition)");
+        handle_err_code(ERR_DIFFERENT_FIELDS);
         return NULL;
     }
 
@@ -297,7 +324,7 @@ polynomial* composition(polynomial* poly_1, polynomial* poly_2) {
 
     polynomial* result = create_zero_poly(field);
     if (result == NULL) {
-        fprintf(stderr, "Memory allocation failed for result (composition)");
+        handle_err_code(ERR_MEMORY_ALLOCATION);
         return NULL;
     }
 
@@ -308,14 +335,14 @@ polynomial* composition(polynomial* poly_1, polynomial* poly_2) {
     // Initialize q_x to the neutral element of the field (typically one for multiplication)
     polynomial* q_x = create_zero_poly(field);
     if (q_x == NULL) {
-        fprintf(stderr, "Memory allocation failed for q_x (composition)");
+        handle_err_code(ERR_MEMORY_ALLOCATION);
         free_polynomial(result);
         return NULL;
     }
 
     void* neutral_elem_prod = field->neutral_elem_prod();
     if (neutral_elem_prod == NULL) {
-        fprintf(stderr, "Failed to get neutral element (composition)");
+        handle_err_code(ERR_NULLPTR);
         free_polynomial(result);
         free_polynomial(q_x);
         return NULL;
@@ -329,15 +356,15 @@ polynomial* composition(polynomial* poly_1, polynomial* poly_2) {
         // Multiply temp coeff of poly_1 with q_x
         temp_poly = scalar_multiply(q_x, poly_1->coeffs + i * field->coeff_size);
         if (temp_poly == NULL) {
-            fprintf(stderr, "Scalar multiplication failed (composition)");
+            handle_err_code(ERR_NULLPTR);
             free_polynomial(result);
             free_polynomial(q_x);
             return NULL;
         }
-        
+
         new_result = sum_polynomials(result, temp_poly);
         if (new_result == NULL) {
-            fprintf(stderr, "Polynomials sum failed (composition)");
+            handle_err_code(ERR_NULLPTR);
             free_polynomial(temp_poly);
             free_polynomial(result);
             free_polynomial(q_x);
@@ -350,7 +377,7 @@ polynomial* composition(polynomial* poly_1, polynomial* poly_2) {
         // Multiply q_x by poly_2
         new_q_x = product_polynomials(q_x, poly_2);
         if (new_q_x == NULL) {
-            fprintf(stderr, "Polynomials product failed (composition)");
+            handle_err_code(ERR_NULLPTR);
             free_polynomial(result);
             free_polynomial(q_x);
             return NULL;
