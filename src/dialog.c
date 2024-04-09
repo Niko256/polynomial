@@ -110,7 +110,9 @@ int select_poly(const char* option) {
     int index;
     scanf("%d", &index);
 
-    if (index <= 0) {
+    index--; // bc indexes starts from 0
+
+    if (index < 0 || index >= polys_count) {
         handle_err_code(ERR_INVALID_SELECTION);
         return -1;
     }
@@ -282,7 +284,7 @@ void poly_menu() {
             }
             break;
             case 6: {
-                index_1 = select_poly("scalar");
+                index_1 = select_poly("for scalar multiplication;");
                 if (index_1 != -1) {
                     printf("Enter scalar value for multiplying\n");
                     void* scalar = malloc(polynomials[index_1]->field->coeff_size);
@@ -351,4 +353,3 @@ void poly_menu() {
         free(polynomials[i]);
     }
 }
-

@@ -50,12 +50,12 @@ void cout_poly(polynomial *poly, Field_Info* field) {
         }
 
         else if (field->coeff_size == sizeof(double)) {
-            printf("%f", *((double*)(poly->coeffs + i * field->coeff_size)));
+            printf("%.2f", *((double*)(poly->coeffs + i * field->coeff_size)));
         }
 
         else if (field->coeff_size == sizeof(complex double)) {
             complex double compl_cf = *((complex double*)(poly->coeffs + i * field->coeff_size));
-            printf("(%f, %f)", creal(compl_cf), cimag(compl_cf));
+            printf("(%.2f, %.2f)", creal(compl_cf), cimag(compl_cf));
         }
 
         if (i > 0)
@@ -70,7 +70,7 @@ void cout_poly(polynomial *poly, Field_Info* field) {
 
 // SUM
 polynomial* sum_polynomials(polynomial* p_1, polynomial* p_2) {
-    if (p_1->field != p_2->field){
+    if (p_1->field->coeff_size != p_2->field->coeff_size){
         handle_err_code(ERR_DIFFERENT_FIELDS);
         return NULL;
     }
@@ -109,7 +109,7 @@ polynomial* sum_polynomials(polynomial* p_1, polynomial* p_2) {
 
 // PRODUCT
 polynomial* product_polynomials(polynomial* p_1, polynomial* p_2) {
-    if (p_1->field != p_2->field) {
+    if (p_1->field->coeff_size != p_2->field->coeff_size) {
         handle_err_code(ERR_DIFFERENT_FIELDS);
         return NULL;
     }   
@@ -315,7 +315,7 @@ void* evaluate_poly(polynomial* poly, void* x) {
 
 
 polynomial* composition(polynomial* poly_1, polynomial* poly_2) {
-    if (poly_1->field != poly_2->field) {
+    if (poly_1->field->coeff_size != poly_2->field->coeff_size) {
         handle_err_code(ERR_DIFFERENT_FIELDS);
         return NULL;
     }
